@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Touch Synthesizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #121214;
+            color: #e1e1e6;
+            margin: 0;
+            padding: 15px;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        h1 { margin-bottom: 5px; color: #00adb5; }
+        .control-panel {
+            background-color: #1a1a1e;
+            border: 2px solid #29292e;
+            border-radius: 8px;
+            max-width: 500px;
+            margin: 15px auto;
+            padding: 15px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+        .control-group label {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .control-group label span { color: #00adb5; }
+        input[type="range"] {
+            width: 100%;
+            accent-color: #00adb5;
+            cursor: pointer;
+        }
+        .keyboard {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            max-width: 500px;
+            margin: 20px auto;
+        }
+        .pad {
+            flex: 1;
+            height: 100px;
+            background-color: #222831;
+            border: 2px solid #393e46;
+            border-radius: 6px;
+            color: #eeeeee;
+            font-weight: bold;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .pad:active {
+            background-color: #00adb5;
+            border-color: 00F2FF;
+            color: #6326FC;
+        }
+        select {
+            padding: 8px;
+            background: #6326FC;
+            color: #fff;
+            border: 2px solid #393e46;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Touch Studio Synthesizer</h1>
+    <p>Adjust controls below and tap pad cells to create patterns</p>
+
+    <!-- Interactive Audio Dashboard -->
+    <div class="control-panel">
+        <div class="control-group">
+            <label>Wave Shape (Oscillator Type)</label>
+            <select id="waveType">
+                <option value="sine">Sine (Smooth / Pure)</option>
+                <option value="square">Square (Retro / Chiptune)</option>
+                <option value="sawtooth">Sawtooth (Aggressive / Lead)</option>
+                <option value="triangle">Triangle (Deep / Mellow)</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label>Volume Boost <span id="volVal">0.3</span></label>
+            <input type="range" id="volume" min="0" max="1" step="0.05" value="0.3">
+        </div>
+
+        <div class="control-group">
+            <label>Note Duration / Release (Seconds) <span id="lengthVal">0.1</span></label>
+            <input type="range" id="noteLength" min="0.1" max="2.0" step="0.1" value="0.4">
+        </div>
+
+        <div class="control-group">
+            <label>Low-Pass Filter Cutoff (Hz) <span id="filterVal">2000</span></label>
+            <input type="range" id="filterCutoff" min="200" max="5000" step="50" value="2000">
+        </div>
+    </div>
+
+    <!-- Musical Interaction Grid Pads -->
+    <div class="keyboard">
+        <div class="pad" id="pad1" data-freq="261.63">C</div>
+        <div class="pad" id="pad2" data-freq="293.66">D</div>
+        <div class="pad" id="pad3" data-freq="329.63">E</div>
+        <div class="pad" id="pad4" data-freq="349.23">F</div>
+        <div class="pad" id="pad5" data-freq="392.00">G</div>
+    </div>
+
+    <script>
+        // Setup cross-browser Audio Context infrastructure
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        // UI Target Elements Variables
+        const waveTypeSelect = document.getElementById("waveType");
+        const volumeSlider = document.getElementById("volume");
+        const lengthSlider = document.getElementById("noteLength");
+        const filterSlider = document.getElementById("filterCutoff");
+
+        // Sync Text Displays with Values
+        volumeSlider.oninput = function() { document.getElementById("volVal").innerText = this.value; }
+        lengthSlider.oninput = function() { document.getElementById("lengthVal").innerText = this.value; }
+        filterSlider.oninput = function() { document.getElementById("filterVal").innerText = this.value; }
+
+        // Dynamic Frequency Player Function
+        function playTone(frequency) {
+            // Lazy load audio engine framework on first user physical interaction
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+
+            // Create low-level Web Audio nodes
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            const filterNode = audioCtx.createBiquadFilter();
+
+            // Link Nodes: Oscillator -> Filter -> Gain Node -> Audio Speakers Output
+            osc.connect(filterNode);
+            filterNode.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            // Apply Values directly from GUI Sliders
+            osc.type = waveTypeSelect.value;
+            osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+            
+            filterNode.type = 'lowpass';
+            filterNode.frequency.setValueAtTime(parseFloat(filterSlider.value), audioCtx.currentTime);
+
+            // Audio Fade Envelope Setup (Prevents aggressive pop sounds)
+            const duration = parseFloat(lengthSlider.value);
+            const volume = parseFloat(volumeSlider.value);
+            
+            gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+
+            // Execute engine cycles
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        // Attach Multi-Touch Responsive Listeners to Music Blocks
+        document.querySelectorAll('.pad').forEach(pad => {
+            const triggerTone = (e) => {
+                e.preventDefault(); // Lock mobile default drag cycles
+                const freq = parseFloat(pad.getAttribute('data-freq'));
+                playTone(freq);
+            };
+
+            pad.addEventListener('pointerdown', triggerTone);
+        });
+    </script>
+</body>
+</html>
