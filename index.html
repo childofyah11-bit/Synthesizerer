@@ -124,6 +124,9 @@
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
         }
 
         // --- SYNTH NOTE PLAYER ---
@@ -259,6 +262,3 @@
         window.addEventListener('keydown', (e) => {
             const keyName = e.key.toLowerCase();
             
-            if (synthKeys[keyName]) {
-                const targetKey = document.getElementById(synthKeys[keyName].id);
-                targetKey.classList.add('active');
