@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Music Studio</title>
+    <title>Keys & Drums Illusion Studio</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -14,7 +14,7 @@
             padding: 20px;
             user-select: none;
         }
-        h1 { color: #00f2ff; margin-bottom: 5px; font-size: 28px; }
+        h1 { color: #00f2ff; margin-bottom: 5px; font-size: 28px; text-shadow: 0 0 10px rgba(0, 242, 255, 0.3); }
         p { color: #888899; margin-bottom: 30px; font-size: 14px; }
         
         .studio-box {
@@ -39,7 +39,7 @@
             padding-left: 8px;
         }
 
-        /* Drum Pads Styling */
+        /* Drum Pads Setup */
         .drum-row {
             display: flex;
             gap: 12px;
@@ -57,6 +57,9 @@
             align-items: center;
             justify-content: center;
             font-weight: bold;
+            position: relative;
+            overflow: hidden;
+            transition: background-color 0.1s, border-color 0.1s;
         }
         .drum-pad span {
             font-size: 11px;
@@ -64,9 +67,13 @@
             margin-top: 5px;
             font-family: monospace;
         }
+        
+        /* Drum Trigger Illusion Styles */
         .drum-pad:active, .drum-pad.active {
             background-color: #7b2cbf;
             border-color: #b5179e;
+            box-shadow: 0 0 15px rgba(181, 23, 158, 0.6);
+            transform: scale(0.97);
         }
 
         /* Keyboard Setup */
@@ -82,7 +89,11 @@
             position: relative;
             cursor: pointer;
             box-sizing: border-box;
+            overflow: hidden;
+            transition: background 0.05s, transform 0.05s;
         }
+        
+        /* White Keys */
         .p-key.white {
             height: 100%;
             flex: 1;
@@ -100,7 +111,11 @@
         }
         .p-key.white:active, .p-key.white.active {
             background: linear-gradient(to bottom, #ffffff 0%, #00f2ff 100%);
+            box-shadow: inset 0 -15px 20px rgba(0, 242, 255, 0.4), 0 0 10px rgba(0, 242, 255, 0.5);
+            color: #000;
         }
+        
+        /* Black Keys */
         .p-key.black {
             height: 60%;
             width: 7%;
@@ -115,13 +130,16 @@
             padding-bottom: 8px;
             color: #aaa;
             font-size: 11px;
+            border: 1px solid #000;
         }
         .p-key.black:active, .p-key.black.active {
-            background: #00f2ff;
-            color: #000;
+            background: linear-gradient(to bottom, #333 0%, #ff007f 100%);
+            border-color: #ff007f;
+            box-shadow: inset 0 -10px 15px rgba(255, 0, 127, 0.6), 0 0 10px rgba(255, 0, 127, 0.5);
+            color: #fff;
         }
 
-        /* Black Keys Offsets positioning */
+        /* Black Keys Offsets Layout */
         #w-key { left: 7.5%; }
         #e-key { left: 18.5%; }
         #t-key { left: 41%; }
@@ -134,15 +152,31 @@
             opacity: 0.7;
             margin-top: 3px;
         }
+
+        /* Shockwave Ripple Effect Illusion */
+        .ripple {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple-effect 0.4s linear;
+            pointer-events: none;
+        }
+        @keyframes ripple-effect {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
 
     <h1>Keys & Drums Studio</h1>
-    <p>Click anywhere inside the box, then jam with your physical keys!</p>
+    <p>Visual Engine Active: Press physical keys to trigger neon light wave illusions!</p>
 
     <div class="studio-box">
-        <!-- DRUMS -->
+        <!-- DRUMS SECTION -->
         <div class="title-bar">Drum Section</div>
         <div class="drum-row">
             <div class="drum-pad" id="p-kick">KICK<span>[Space]</span></div>
@@ -174,107 +208,73 @@
     </div>
 
     <script>
-        let ctx = null;
-
-        function checkAudio() {
-            if (!ctx) {
-                ctx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (ctx && ctx.state === 'suspended') {
-                ctx.resume();
-            }
+        // --- VISUAL RIPPLE GENERATOR ENGINE ---
+        function createVisualRipple(element) {
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple');
+            
+            // Center the ripple inside the key/pad bounds
+            const size = Math.max(element.clientWidth, element.clientHeight);
+            ripple.style.width = ripple.style.height = `${size}px`;
+            ripple.style.left = `${element.clientWidth / 2 - size / 2}px`;
+            ripple.style.top = `${element.clientHeight / 2 - size / 2}px`;
+            
+            // Clean up old ripple nodes to maintain page performance
+            element.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 400);
         }
 
-        // --- SYNTH TONE ---
-        function playNote(freq) {
-            checkAudio();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(freq, ctx.currentTime);
-            
-            gain.gain.setValueAtTime(0.2, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-            
-            osc.start();
-            osc.stop(ctx.currentTime + 0.4);
-        }
-
-        // --- DRUM SOUND GENERATORS ---
-        function drumKick() {
-            checkAudio();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(130, ctx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
-            gain.gain.setValueAtTime(0.8, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
-            osc.start();
-            osc.stop(ctx.currentTime + 0.12);
-        }
-
-        function drumSnare() {
-            checkAudio();
-            const len = ctx.sampleRate * 0.12;
-            const buf = ctx.createBuffer(1, len, ctx.sampleRate);
-            const data = buf.getChannelData(0);
-            for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
-            
-            const src = ctx.createBufferSource();
-            src.buffer = buf;
-            const filt = ctx.createBiquadFilter();
-            filt.type = 'highpass';
-            filt.frequency.value = 1600;
-            const gain = ctx.createGain();
-            
-            src.connect(filt);
-            filt.connect(gain);
-            gain.connect(ctx.destination);
-            
-            gain.gain.setValueAtTime(0.4, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
-            src.start();
-            src.stop(ctx.currentTime + 0.12);
-        }
-
-        function drumHat() {
-            checkAudio();
-            const len = ctx.sampleRate * 0.04;
-            const buf = ctx.createBuffer(1, len, ctx.sampleRate);
-            const data = buf.getChannelData(0);
-            for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
-            
-            const src = ctx.createBufferSource();
-            src.buffer = buf;
-            const filt = ctx.createBiquadFilter();
-            filt.type = 'bandpass';
-            filt.frequency.value = 8500;
-            const gain = ctx.createGain();
-            
-            src.connect(filt);
-            filt.connect(gain);
-            gain.connect(ctx.destination);
-            
-            gain.gain.setValueAtTime(0.2, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
-            src.start();
-            src.stop(ctx.currentTime + 0.04);
-        }
-
-        // --- MAPS ---
+        // --- MAPPED INPUT DICTIONARY ---
         const keyMap = {
-            'a': { id: 'a-key', fn: () => playNote(261.63) },
-            's': { id: 's-key', fn: () => playNote(293.66) },
-            'd': { id: 'd-key', fn: () => playNote(329.63) },
-            'f': { id: 'f-key', fn: () => playNote(349.23) },
-            'g': { id: 'g-key', fn: () => playNote(392.00) },
-            'h': { id: 'h-key', fn: () => playNote(440.00) },
-            'j': { id: 'j-key', fn: () => playNote(493.88) },
-            'k': { id: 'k-key', fn: () => playNote(523.25) },
-            'l': { id: 'l-key', fn: () => playNote(587.33) },
+            'a': { id: 'a-key' },
+            's': { id: 's-key' },
+            'd': { id: 'd-key' },
+            'f': { id: 'f-key' },
+            'g': { id: 'g-key' },
+            'h': { id: 'h-key' },
+            'j': { id: 'j-key' },
+            'k': { id: 'k-key' },
+            'l': { id: 'l-key' },
+            'w': { id: 'w-key' },
+            'e': { id: 'e-key' },
+            't': { id: 't-key' },
+            'y': { id: 'y-key' },
+            'u': { id: 'u-key' },
+            ' ': { id: 'p-kick', scroll: true },
+            'b': { id: 'p-snare' },
+            'n': { id: 'p-hihat' }
+        };
+
+        // --- BIND INTERACTION TRIGGERS ---
+        // Mouse click click visual tracking setup
+        document.querySelectorAll('.p-key, .drum-pad').forEach(element => {
+            element.addEventListener('mousedown', () => {
+                createVisualRipple(element);
+            });
+        });
+
+        // Physical Keyboard Down Press routing
+        window.addEventListener('keydown', (e) => {
+            const map = keyMap[e.key.toLowerCase()];
+            if (map) {
+                if (map.scroll) e.preventDefault(); // Prevents spacebar down-scroll
+                
+                const el = document.getElementById(map.id);
+                if (el && !el.classList.contains('active')) {
+                    el.classList.add('active');
+                    createVisualRipple(el);
+                }
+            }
+        });
+
+        // Physical Keyboard Release Tracking
+        window.addEventListener('keyup', (e) => {
+            const map = keyMap[e.key.toLowerCase()];
+            if (map) {
+                const el = document.getElementById(map.id);
+                if (el) el.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
