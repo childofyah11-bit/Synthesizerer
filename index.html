@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Touch Synthesizer</title>
+    <title>Keys & Drums Studio</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,180 +12,253 @@
             color: #e1e1e6;
             margin: 0;
             padding: 15px;
-            touch-action: manipulation;
             user-select: none;
-            -webkit-user-select: none;
         }
-        h1 { margin-bottom: 5px; color: #00adb5; }
-        .control-panel {
-            background-color: #1a1a1e;
-            border: 2px solid #29292e;
-            border-radius: 8px;
-            max-width: 500px;
-            margin: 15px auto;
-            padding: 15px;
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-        }
-        .control-group {
-            display: flex;
-            flex-direction: column;
+        h1 { color: #00adb5; margin-bottom: 5px; }
+        .hint { color: #888; font-size: 14px; margin-bottom: 20px; }
+        
+        .section-title {
+            font-size: 18px;
+            color: #eeeeee;
+            margin: 20px 0 10px;
             text-align: left;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
         }
-        .control-group label {
-            font-weight: bold;
-            font-size: 14px;
-            margin-bottom: 5px;
-            display: flex;
-            justify-content: space-between;
-        }
-        .control-group label span { color: #00adb5; }
-        input[type="range"] {
-            width: 100%;
-            accent-color: #00adb5;
-            cursor: pointer;
-        }
+
+        /* Keyboard Grid */
         .keyboard {
             display: flex;
             justify-content: center;
-            gap: 8px;
-            max-width: 500px;
-            margin: 20px auto;
+            gap: 6px;
+            max-width: 650px;
+            margin: 0 auto;
         }
-        .pad {
+        .key {
             flex: 1;
-            height: 100px;
+            height: 120px;
             background-color: #222831;
             border: 2px solid #393e46;
             border-radius: 6px;
             color: #eeeeee;
-            font-weight: bold;
-            font-size: 18px;
             display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding-bottom: 10px;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+        .key .note-name { font-weight: bold; font-size: 16px; }
+        .key .keyboard-hint { font-size: 12px; color: #00adb5; margin-top: 5px; font-family: monospace; }
+        .key:active, .key.active {
+            background-color: #00adb5;
+            border-color: #00F2FF;
+            color: #121214;
+        }
+        .key:active .keyboard-hint, .key.active .keyboard-hint { color: #121214; }
+
+        /* Drums Layout */
+        .drum-pad-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            max-width: 650px;
+            margin: 0 auto 20px;
+        }
+        .drum-pad {
+            flex: 1;
+            height: 80px;
+            background-color: #3f2b96;
+            border: 2px solid #a8c0ff;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             cursor: pointer;
         }
-        .pad:active {
-            background-color: #00adb5;
-            border-color: 00F2FF;
-            color: #6326FC;
+        .drum-pad span { font-size: 11px; color: #a8c0ff; margin-top: 4px; font-family: monospace; }
+        .drum-pad:active, .drum-pad.active {
+            background-color: #a8c0ff;
+            color: #3f2b96;
         }
-        select {
-            padding: 8px;
-            background: #6326FC;
-            color: #fff;
-            border: 2px solid #393e46;
-            border-radius: 4px;
-            font-size: 14px;
-        }
+        .drum-pad:active span, .drum-pad.active span { color: #3f2b96; }
     </style>
 </head>
 <body>
 
-    <h1>Touch Studio Synthesizer</h1>
-    <p>Adjust controls below and tap pad cells to create patterns</p>
+    <h1>Keys & Drums Studio</h1>
+    <p class="hint">Click the pads or use your physical computer keyboard to play live loops!</p>
 
-    <!-- Interactive Audio Dashboard -->
-    <div class="control-panel">
-        <div class="control-group">
-            <label>Wave Shape (Oscillator Type)</label>
-            <select id="waveType">
-                <option value="sine">Sine (Smooth / Pure)</option>
-                <option value="square">Square (Retro / Chiptune)</option>
-                <option value="sawtooth">Sawtooth (Aggressive / Lead)</option>
-                <option value="triangle">Triangle (Deep / Mellow)</option>
-            </select>
-        </div>
-
-        <div class="control-group">
-            <label>Volume Boost <span id="volVal">0.3</span></label>
-            <input type="range" id="volume" min="0" max="1" step="0.05" value="0.3">
-        </div>
-
-        <div class="control-group">
-            <label>Note Duration / Release (Seconds) <span id="lengthVal">0.1</span></label>
-            <input type="range" id="noteLength" min="0.1" max="2.0" step="0.1" value="0.4">
-        </div>
-
-        <div class="control-group">
-            <label>Low-Pass Filter Cutoff (Hz) <span id="filterVal">2000</span></label>
-            <input type="range" id="filterCutoff" min="200" max="5000" step="50" value="2000">
-        </div>
+    <!-- DRUMS SECTION -->
+    <div class="section-title">Drum Pads</div>
+    <div class="drum-pad-container">
+        <div class="drum-pad" id="drum-kick">KICK <span>[Space]</span></div>
+        <div class="drum-pad" id="drum-snare">SNARE <span>[B]</span></div>
+        <div class="drum-pad" id="drum-hihat">HI-HAT <span>[N]</span></div>
     </div>
 
-    <!-- Musical Interaction Grid Pads -->
+    <!-- SYNTHESIZER SECTION -->
+    <div class="section-title">Synthesizer Notes</div>
     <div class="keyboard">
-        <div class="pad" id="pad1" data-freq="261.63">C</div>
-        <div class="pad" id="pad2" data-freq="293.66">D</div>
-        <div class="pad" id="pad3" data-freq="329.63">E</div>
-        <div class="pad" id="pad4" data-freq="349.23">F</div>
-        <div class="pad" id="pad5" data-freq="392.00">G</div>
+        <div class="key" id="key-A" data-freq="261.63"><div class="note-name">C4</div><div class="keyboard-hint">A</div></div>
+        <div class="key" id="key-S" data-freq="293.66"><div class="note-name">D4</div><div class="keyboard-hint">S</div></div>
+        <div class="key" id="key-D" data-freq="329.63"><div class="note-name">E4</div><div class="keyboard-hint">D</div></div>
+        <div class="key" id="key-F" data-freq="349.23"><div class="note-name">F4</div><div class="keyboard-hint">F</div></div>
+        <div class="key" id="key-G" data-freq="392.00"><div class="note-name">G4</div><div class="keyboard-hint">G</div></div>
+        <div class="key" id="key-H" data-freq="440.00"><div class="note-name">A4</div><div class="keyboard-hint">H</div></div>
+        <div class="key" id="key-J" data-freq="493.88"><div class="note-name">B4</div><div class="keyboard-hint">J</div></div>
+        <div class="key" id="key-K" data-freq="523.25"><div class="note-name">C5</div><div class="keyboard-hint">K</div></div>
+        <div class="key" id="key-L" data-freq="587.33"><div class="note-name">D5</div><div class="keyboard-hint">L</div></div>
     </div>
 
     <script>
-        // Setup cross-browser Audio Context infrastructure
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
         let audioCtx = null;
 
-        // UI Target Elements Variables
-        const waveTypeSelect = document.getElementById("waveType");
-        const volumeSlider = document.getElementById("volume");
-        const lengthSlider = document.getElementById("noteLength");
-        const filterSlider = document.getElementById("filterCutoff");
-
-        // Sync Text Displays with Values
-        volumeSlider.oninput = function() { document.getElementById("volVal").innerText = this.value; }
-        lengthSlider.oninput = function() { document.getElementById("lengthVal").innerText = this.value; }
-        filterSlider.oninput = function() { document.getElementById("filterVal").innerText = this.value; }
-
-        // Dynamic Frequency Player Function
-        function playTone(frequency) {
-            // Lazy load audio engine framework on first user physical interaction
+        function initAudio() {
             if (!audioCtx) {
-                audioCtx = new AudioContext();
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
-
-            // Create low-level Web Audio nodes
-            const osc = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            const filterNode = audioCtx.createBiquadFilter();
-
-            // Link Nodes: Oscillator -> Filter -> Gain Node -> Audio Speakers Output
-            osc.connect(filterNode);
-            filterNode.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-
-            // Apply Values directly from GUI Sliders
-            osc.type = waveTypeSelect.value;
-            osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
-            
-            filterNode.type = 'lowpass';
-            filterNode.frequency.setValueAtTime(parseFloat(filterSlider.value), audioCtx.currentTime);
-
-            // Audio Fade Envelope Setup (Prevents aggressive pop sounds)
-            const duration = parseFloat(lengthSlider.value);
-            const volume = parseFloat(volumeSlider.value);
-            
-            gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-
-            // Execute engine cycles
-            osc.start();
-            osc.stop(audioCtx.currentTime + duration);
         }
 
-        // Attach Multi-Touch Responsive Listeners to Music Blocks
-        document.querySelectorAll('.pad').forEach(pad => {
-            const triggerTone = (e) => {
-                e.preventDefault(); // Lock mobile default drag cycles
-                const freq = parseFloat(pad.getAttribute('data-freq'));
-                playTone(freq);
-            };
+        // --- SYNTH NOTE PLAYER ---
+        function playTone(frequency) {
+            initAudio();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+            
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.4);
+        }
 
-            pad.addEventListener('pointerdown', triggerTone);
+        // --- CLEAN INDEPENDENT DRUM ENGINES ---
+        function playKick() {
+            initAudio();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+
+            gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.15);
+        }
+
+        function playSnare() {
+            initAudio();
+            const bufferSize = audioCtx.sampleRate * 0.15;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = buffer;
+
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'highpass';
+            filter.frequency.value = 1200;
+
+            const gainNode = audioCtx.createGain();
+
+            noise.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            gainNode.gain.setValueAtTime(0.6, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+
+            noise.start();
+            noise.stop(audioCtx.currentTime + 0.15);
+        }
+
+        function playHiHat() {
+            initAudio();
+            const bufferSize = audioCtx.sampleRate * 0.04;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = buffer;
+
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.value = 8000;
+
+            const gainNode = audioCtx.createGain();
+
+            noise.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+
+            noise.start();
+            noise.stop(audioCtx.currentTime + 0.04);
+        }
+
+        // --- MAP KEYS TO ACTIONS ---
+        const synthKeys = {
+            'a': { id: 'key-A', freq: 261.63 },
+            's': { id: 'key-S', freq: 293.66 },
+            'd': { id: 'key-D', freq: 329.63 },
+            'f': { id: 'key-F', freq: 349.23 },
+            'g': { id: 'key-G', freq: 392.00 },
+            'h': { id: 'key-H', freq: 440.00 },
+            'j': { id: 'key-J', freq: 493.88 },
+            'k': { id: 'key-K', freq: 523.25 },
+            'l': { id: 'key-L', freq: 587.33 }
+        };
+
+        const drumKeys = {
+            ' ': { id: 'drum-kick', action: playKick },
+            'b': { id: 'drum-snare', action: playSnare },
+            'n': { id: 'drum-hihat', action: playHiHat }
+        };
+
+        // --- EVENT LISTENERS ---
+        // Mouse/Touch triggers
+        document.querySelectorAll('.key').forEach(key => {
+            key.addEventListener('pointerdown', () => {
+                playTone(parseFloat(key.getAttribute('data-freq')));
+            });
         });
-    </script>
-</body>
-</html>
+
+        document.getElementById('drum-kick').addEventListener('pointerdown', playKick);
+        document.getElementById('drum-snare').addEventListener('pointerdown', playSnare);
+        document.getElementById('drum-hihat').addEventListener('pointerdown', playHiHat);
+
+        // Physical Keyboard Event routing
+        window.addEventListener('keydown', (e) => {
+            const keyName = e.key.toLowerCase();
+            
+            if (synthKeys[keyName]) {
+                const targetKey = document.getElementById(synthKeys[keyName].id);
+                targetKey.classList.add('active');
