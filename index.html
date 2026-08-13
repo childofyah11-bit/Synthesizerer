@@ -3,276 +3,253 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Keys & Drums Illusion Studio</title>
+    <title>Neon Jam Station</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #111116;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #0b0b12;
             color: #ffffff;
             text-align: center;
             margin: 0;
             padding: 20px;
             user-select: none;
         }
-        h1 { color: #00f2ff; margin-bottom: 5px; font-size: 28px; text-shadow: 0 0 10px rgba(0, 242, 255, 0.3); }
-        p { color: #888899; margin-bottom: 30px; font-size: 14px; }
+        h1 { color: #00f2ff; margin-bottom: 5px; text-shadow: 0 0 15px rgba(0,242,255,0.4); }
+        .subtitle { color: #707085; font-size: 14px; margin-bottom: 30px; }
         
-        .studio-box {
-            background-color: #1a1a24;
-            border: 2px solid #2d2d3f;
-            border-radius: 12px;
-            padding: 25px;
-            max-width: 650px;
+        .panel {
+            background-color: #141420;
+            border: 2px solid #252538;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 550px;
             margin: 0 auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
         }
 
-        .title-bar {
-            font-size: 13px;
+        /* Power Toggle Button */
+        .power-btn {
+            background: linear-gradient(135deg, #00b4d8, #0077b6);
+            border: none;
+            color: white;
+            padding: 16px 32px;
+            font-size: 18px;
             font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 180, 216, 0.4);
+            transition: all 0.2s;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #a0a0b0;
-            text-align: left;
-            margin-bottom: 12px;
-            border-left: 3px solid #00f2ff;
-            padding-left: 8px;
+            margin-bottom: 30px;
+            width: 80%;
         }
+        .power-btn.active {
+            background: linear-gradient(135deg, #ff0055, #9e0031);
+            box-shadow: 0 0 25px rgba(255, 0, 85, 0.6);
+        }
+        .power-btn:hover { transform: scale(1.02); }
 
-        /* Drum Pads Setup */
-        .drum-row {
+        /* Sequencer Step Display Grid */
+        .visual-track {
             display: flex;
-            gap: 12px;
-            margin-bottom: 35px;
-        }
-        .drum-pad {
-            flex: 1;
-            height: 85px;
-            background-color: #252535;
-            border: 2px solid #3d3d56;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            gap: 6px;
             justify-content: center;
-            font-weight: bold;
-            position: relative;
-            overflow: hidden;
-            transition: background-color 0.1s, border-color 0.1s;
+            background-color: #08080f;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #1f1f33;
         }
-        .drum-pad span {
-            font-size: 11px;
-            color: #00f2ff;
-            margin-top: 5px;
-            font-family: monospace;
-        }
-        
-        /* Drum Trigger Illusion Styles */
-        .drum-pad:active, .drum-pad.active {
-            background-color: #7b2cbf;
-            border-color: #b5179e;
-            box-shadow: 0 0 15px rgba(181, 23, 158, 0.6);
-            transform: scale(0.97);
-        }
-
-        /* Keyboard Setup */
-        .piano-container {
-            position: relative;
-            background-color: #000;
-            padding: 3px;
-            border-radius: 8px;
-            height: 170px;
-            display: flex;
-        }
-        .p-key {
-            position: relative;
-            cursor: pointer;
-            box-sizing: border-box;
-            overflow: hidden;
-            transition: background 0.05s, transform 0.05s;
-        }
-        
-        /* White Keys */
-        .p-key.white {
-            height: 100%;
+        .step-block {
             flex: 1;
-            background: linear-gradient(to bottom, #ffffff 0%, #e0e0e0 100%);
-            border: 1px solid #111;
-            border-radius: 0 0 4px 4px;
-            z-index: 1;
+            height: 45px;
+            background-color: #181826;
+            border-radius: 6px;
+            transition: all 0.1s ease;
+            position: relative;
+        }
+        .step-block.active {
+            background-color: #00f2ff;
+            box-shadow: 0 0 15px #00f2ff;
+        }
+        .step-block.pulse-kick { border: 2px solid #ff0055; box-shadow: inset 0 0 10px rgba(255,0,85,0.5); }
+        .step-block.pulse-snare { border: 2px solid #ffaa00; box-shadow: inset 0 0 10px rgba(255,170,0,0.5); }
+
+        .dashboard {
             display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            align-items: center;
-            padding-bottom: 10px;
-            color: #222;
+            justify-content: space-around;
+            margin-top: 25px;
+            font-size: 12px;
             font-weight: bold;
-        }
-        .p-key.white:active, .p-key.white.active {
-            background: linear-gradient(to bottom, #ffffff 0%, #00f2ff 100%);
-            box-shadow: inset 0 -15px 20px rgba(0, 242, 255, 0.4), 0 0 10px rgba(0, 242, 255, 0.5);
-            color: #000;
-        }
-        
-        /* Black Keys */
-        .p-key.black {
-            height: 60%;
-            width: 7%;
-            background: linear-gradient(to bottom, #333 0%, #111 100%);
-            border-radius: 0 0 3px 3px;
-            z-index: 2;
-            position: absolute;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            align-items: center;
-            padding-bottom: 8px;
-            color: #aaa;
-            font-size: 11px;
-            border: 1px solid #000;
-        }
-        .p-key.black:active, .p-key.black.active {
-            background: linear-gradient(to bottom, #333 0%, #ff007f 100%);
-            border-color: #ff007f;
-            box-shadow: inset 0 -10px 15px rgba(255, 0, 127, 0.6), 0 0 10px rgba(255, 0, 127, 0.5);
-            color: #fff;
-        }
-
-        /* Black Keys Offsets Layout */
-        #w-key { left: 7.5%; }
-        #e-key { left: 18.5%; }
-        #t-key { left: 41%; }
-        #y-key { left: 52%; }
-        #u-key { left: 63%; }
-
-        .hint-text {
-            font-size: 11px;
+            color: #a0a0c0;
+            text-transform: uppercase;
             font-family: monospace;
-            opacity: 0.7;
-            margin-top: 3px;
         }
-
-        /* Shockwave Ripple Effect Illusion */
-        .ripple {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.4);
-            border-radius: 50%;
-            transform: scale(0);
-            animation: ripple-effect 0.4s linear;
-            pointer-events: none;
-        }
-        @keyframes ripple-effect {
-            to {
-                transform: scale(4);
-                opacity: 0;
-            }
-        }
+        .stat span { color: #00f2ff; display: block; font-size: 18px; margin-top: 4px; }
     </style>
 </head>
 <body>
 
-    <h1>Keys & Drums Studio</h1>
-    <p>Visual Engine Active: Press physical keys to trigger neon light wave illusions!</p>
+    <h1>Neon Groove Arranger</h1>
+    <div class="subtitle">Automatic Synthesis: Pro Chords, Melodic Arps & Drum Logic Arrays</div>
 
-    <div class="studio-box">
-        <!-- DRUMS SECTION -->
-        <div class="title-bar">Drum Section</div>
-        <div class="drum-row">
-            <div class="drum-pad" id="p-kick">KICK<span>[Space]</span></div>
-            <div class="drum-pad" id="p-snare">SNARE<span>[B]</span></div>
-            <div class="drum-pad" id="p-hihat">HI-HAT<span>[N]</span></div>
+    <div class="panel">
+        <!-- TRIGGER INTERFACE -->
+        <button class="power-btn" id="jam-trigger">Start Groove <span>[Spacebar]</span></button>
+
+        <!-- VISUAL LINE ILLUSION TRACK -->
+        <div class="visual-track">
+            <div class="step-block" id="st-0"></div>
+            <div class="step-block" id="st-1"></div>
+            <div class="step-block" id="st-2"></div>
+            <div class="step-block" id="st-3"></div>
+            <div class="step-block" id="st-4"></div>
+            <div class="step-block" id="st-5"></div>
+            <div class="step-block" id="st-6"></div>
+            <div class="step-block" id="st-7"></div>
         </div>
 
-        <!-- CHROMATIC SYNTH KEYBOARD -->
-        <div class="title-bar">Synthesizer Piano Array</div>
-        <div class="piano-container">
-            <!-- White Keys -->
-            <div class="p-key white" id="a-key">C4<span class="hint-text">A</span></div>
-            <div class="p-key white" id="s-key">D4<span class="hint-text">S</span></div>
-            <div class="p-key white" id="d-key">E4<span class="hint-text">D</span></div>
-            <div class="p-key white" id="f-key">F4<span class="hint-text">F</span></div>
-            <div class="p-key white" id="g-key">G4<span class="hint-text">G</span></div>
-            <div class="p-key white" id="h-key">A4<span class="hint-text">H</span></div>
-            <div class="p-key white" id="j-key">B4<span class="hint-text">J</span></div>
-            <div class="p-key white" id="k-key">C5<span class="hint-text">K</span></div>
-            <div class="p-key white" id="l-key">D5<span class="hint-text">L</span></div>
-
-            <!-- Black Keys -->
-            <div class="p-key black" id="w-key">C#<span class="hint-text">W</span></div>
-            <div class="p-key black" id="e-key">D#<span class="hint-text">E</span></div>
-            <div class="p-key black" id="t-key">F#<span class="hint-text">T</span></div>
-            <div class="p-key black" id="y-key">G#<span class="hint-text">Y</span></div>
-            <div class="p-key black" id="u-key">A#<span class="hint-text">U</span></div>
+        <!-- ENGINE STAT readout DISPLAY -->
+        <div class="dashboard">
+            <div class="stat">Tempo <span>120 BPM</span></div>
+            <div class="stat">Key <span>A Minor</span></div>
+            <div class="stat">Mode <span>Auto-Jam</span></div>
         </div>
     </div>
 
     <script>
-        // --- VISUAL RIPPLE GENERATOR ENGINE ---
-        function createVisualRipple(element) {
-            const ripple = document.createElement('span');
-            ripple.classList.add('ripple');
-            
-            // Center the ripple inside the key/pad bounds
-            const size = Math.max(element.clientWidth, element.clientHeight);
-            ripple.style.width = ripple.style.height = `${size}px`;
-            ripple.style.left = `${element.clientWidth / 2 - size / 2}px`;
-            ripple.style.top = `${element.clientHeight / 2 - size / 2}px`;
-            
-            // Clean up old ripple nodes to maintain page performance
-            element.appendChild(ripple);
-            setTimeout(() => ripple.remove(), 400);
+        let audioCtx = null;
+        let isPlaying = false;
+        let currentStep = 0;
+        let intervalId = null;
+
+        // Base structural frequencies mapping out a guitar/synth progression
+        const chordProgression = [
+            [220.00, 261.63, 329.63], // Am chord notes
+            [220.00, 261.63, 329.63], 
+            [174.61, 220.00, 261.63], // F Maj chord notes
+            [174.61, 220.00, 261.63],
+            [196.00, 246.94, 293.66], // G Maj chord notes
+            [196.00, 246.94, 293.66],
+            [164.81, 196.00, 246.94], // Em chord notes
+            [164.81, 196.00, 246.94]
+        ];
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
         }
 
-        // --- MAPPED INPUT DICTIONARY ---
-        const keyMap = {
-            'a': { id: 'a-key' },
-            's': { id: 's-key' },
-            'd': { id: 'd-key' },
-            'f': { id: 'f-key' },
-            'g': { id: 'g-key' },
-            'h': { id: 'h-key' },
-            'j': { id: 'j-key' },
-            'k': { id: 'k-key' },
-            'l': { id: 'l-key' },
-            'w': { id: 'w-key' },
-            'e': { id: 'e-key' },
-            't': { id: 't-key' },
-            'y': { id: 'y-key' },
-            'u': { id: 'u-key' },
-            ' ': { id: 'p-kick', scroll: true },
-            'b': { id: 'p-snare' },
-            'n': { id: 'p-hihat' }
-        };
+        // --- MODELLED SYNTH SYSTEMS ---
+        function playKick() {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(140, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.12);
+            gain.gain.setValueAtTime(0.8, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.12);
+        }
 
-        // --- BIND INTERACTION TRIGGERS ---
-        // Mouse click click visual tracking setup
-        document.querySelectorAll('.p-key, .drum-pad').forEach(element => {
-            element.addEventListener('mousedown', () => {
-                createVisualRipple(element);
-            });
-        });
+        function playSnare() {
+            const len = audioCtx.sampleRate * 0.1;
+            const buf = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+            const data = buf.getChannelData(0);
+            for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+            const src = audioCtx.createBufferSource(); src.buffer = buf;
+            const filt = audioCtx.createBiquadFilter(); filt.type = 'highpass'; filt.frequency.value = 1800;
+            const gain = audioCtx.createGain();
+            src.connect(filt); filt.connect(gain); gain.connect(audioCtx.destination);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+            src.start(); src.stop(audioCtx.currentTime + 0.1);
+        }
 
-        // Physical Keyboard Down Press routing
-        window.addEventListener('keydown', (e) => {
-            const map = keyMap[e.key.toLowerCase()];
-            if (map) {
-                if (map.scroll) e.preventDefault(); // Prevents spacebar down-scroll
+        // Simulates custom filtered physical properties resembling a plucked string instrument
+        function playGuitarPluck(freq, delay) {
+            setTimeout(() => {
+                if(!isPlaying) return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                const filter = audioCtx.createBiquadFilter();
                 
-                const el = document.getElementById(map.id);
-                if (el && !el.classList.contains('active')) {
-                    el.classList.add('active');
-                    createVisualRipple(el);
-                }
-            }
-        });
+                osc.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(2000, audioCtx.currentTime);
+                filter.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.3);
+                
+                gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.35);
+            }, delay);
+        }
 
-        // Physical Keyboard Release Tracking
-        window.addEventListener('keyup', (e) => {
-            const map = keyMap[e.key.toLowerCase()];
-            if (map) {
-                const el = document.getElementById(map.id);
-                if (el) el.classList.remove('active');
+        // --- ARRANGER CORE STEP LOGIC ---
+        function runSequencerStep() {
+            // Clean interface track highlights
+            document.querySelectorAll('.step-block').forEach(b => b.className = 'step-block');
+            
+            const currentBlock = document.getElementById(`st-${currentStep}`);
+            currentBlock.classList.add('active');
+
+            // Drum Patterns Assignment Logic
+            if (currentStep === 0 || currentStep === 4) {
+                playKick();
+                currentBlock.classList.add('pulse-kick');
+            } else if (currentStep === 2 || currentStep === 6) {
+                playSnare();
+                currentBlock.classList.add('pulse-snare');
+            }
+
+            // Guitar Chords Strum logic algorithm array parsing
+            const chord = chordProgression[currentStep];
+            playGuitarPluck(chord[0], 0);   // Bass root note
+            playGuitarPluck(chord[1], 30);  // Middle string pluck
+            playGuitarPluck(chord[2], 60);  // High string pluck
+
+            currentStep = (currentStep + 1) % 8;
+        }
+
+        function togglePlayback() {
+            initAudio();
+            const btn = document.getElementById('jam-trigger');
+            
+            if (isPlaying) {
+                clearInterval(intervalId);
+                isPlaying = false;
+                btn.classList.remove('active');
+                btn.innerHTML = 'Start Groove <span>[Spacebar]</span>';
+                document.querySelectorAll('.step-block').forEach(b => b.className = 'step-block');
+                currentStep = 0;
+            } else {
+                isPlaying = true;
+                btn.classList.add('active');
+                btn.innerHTML = 'Stop Groove <span>[Spacebar]</span>';
+                // Drives the structural sequence running cleanly at 120BPM intervals
+                intervalId = setInterval(runSequencerStep, 250);
+            }
+        }
+
+        // --- LISTENERS ---
+        document.getElementById('jam-trigger').addEventListener('click', togglePlayback);
+        
+        window.addEventListener('keydown', (e) => {
+            if (e.key === ' ') {
+                e.preventDefault(); // Disables browser page layout viewport shifts
+                togglePlayback();
             }
         });
     </script>
