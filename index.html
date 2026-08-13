@@ -93,7 +93,7 @@
 <body>
 
     <h1>Keys & Drums Studio</h1>
-    <p class="hint">Click the pads or use your physical computer keyboard to play live loops!</p>
+    <p class="hint">Click anywhere on the screen first, then play using your keyboard!</p>
 
     <!-- DRUMS SECTION -->
     <div class="section-title">Drum Pads</div>
@@ -129,7 +129,7 @@
             }
         }
 
-        // --- SYNTH NOTE PLAYER ---
+        // --- FIXED SYNTH NOTE PLAYER ---
         function playTone(frequency) {
             initAudio();
             const osc = audioCtx.createOscillator();
@@ -138,17 +138,21 @@
             osc.connect(gainNode);
             gainNode.connect(audioCtx.destination);
             
-            osc.type = 'sine';
+            osc.type = 'sine'; // Clean basic sound
             osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
             
-            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+            // Hardcoded safe values to completely bypass missing HTML sliders
+            const duration = 0.4; 
+            const volume = 0.3;   
+            
+            gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
             
             osc.start();
-            osc.stop(audioCtx.currentTime + 0.4);
+            osc.stop(audioCtx.currentTime + duration);
         }
 
-        // --- CLEAN INDEPENDENT DRUM ENGINES ---
+        // --- FIXED DRUM PLAYER ENGINE ---
         function playKick() {
             initAudio();
             const osc = audioCtx.createOscillator();
@@ -259,6 +263,3 @@
         document.getElementById('drum-hihat').addEventListener('pointerdown', playHiHat);
 
         // Physical Keyboard Event routing
-        window.addEventListener('keydown', (e) => {
-            const keyName = e.key.toLowerCase();
-            
